@@ -6,13 +6,14 @@ const cors = require("cors");
 
 const app = express();
 const server = http.createServer(app);
+
 const sessionMiddleware = session({
     secret: "test"
 })
 
 const io = socketIO(server, {
     cors: {
-        origin: "http://127.0.0.1:5500"
+        origin: "*"
     }
 }); 
 
@@ -22,18 +23,26 @@ app.use(sessionMiddleware)
 
 io.engine.use(sessionMiddleware)
 
+const getRandomRoom = () =>{
+    const random = Math.random()
+    if(random > .5){
+        return "a"
+    } else{
+        return "b"
+    }
+}
+ 
 io.on("connection", (socket) =>{
-    console.log("socket", socket.request.session)
-    console.log("a user connected")
+    const room = getRandomRoom()
+    socket.join(room);
     socket.on("message", (arg) =>{
-        console.log(arg)
-        socket.emit("broadcast", arg)
+        // console.log(arg)
+        socket.to(room).emit("broadcast", room)
     })
 })
 
 app.get("/", (req, res) =>{
     // console.log("FETCH", req)
-    console.log("SESSION", req.session)
     res.send({data: "data"})
 })
 
