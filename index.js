@@ -33,11 +33,12 @@ const getRandomRoom = () =>{
 }
  
 io.on("connection", (socket) =>{
-    const room = getRandomRoom()
+    const room = socket.handshake.query.room
     socket.join(room);
     socket.on("message", (arg) =>{
         // console.log(arg)
         socket.to(room).emit("broadcast", room)
+        // socket.broadcast.emit("broadcast", arg)
     })
 })
 
